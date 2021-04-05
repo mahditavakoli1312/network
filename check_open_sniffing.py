@@ -1,71 +1,62 @@
-'''
-Created on Mar 24, 2021
+import socket
+import threading
+from queue import Queue
+import time
+import sys
 
-@author: sazgar
-'''
-#Python code for simple port scanning
+print_lock = threading.Lock();
 
-import socket #importing library
+target = sys.argv[1]
 
-ip = socket.gethostbyname (socket.gethostname()) #getting ip-address of host
-
-for port in range(65535):  
-    socket.setdefaulttimeout(1)   #check for all available ports
-
+def scan(port):
+    s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    socket.setdefaulttimeout(int(dtimeout))   
     try:
-
-        serv = socket.socket(socket.AF_INET,socket.SOCK_STREAM) # create a new socket
-
-        serv.bind((ip,port)) # bind socket with address
-            
+        con = s.connect((target,port))
+        with print_lock:
+            print('port ',port,'is open')
+            con.close()
     except:
+        pass
+        
+             
+def threader():
+    while True:
+        worker = q.get()
+        scan(worker)
+        q.task_done()
+        
+q = Queue()
 
-        print('[OPEN] Port open :',port) #print open port number
+nthread = input("number of threads ?")
+dtimeout = input("timeout?")
+portrange = input("range is (1,?)")
 
-    serv.close() #close connection
+for x in range(int(nthread)):
+    t = threading.Thread(target=threader)
+    t.daemon = True
+    t.start()
+start = time.time()
 
-#
-# import pyfiglet
-# import sys
-# import socket
-# from datetime import datetime
-#
-# ascii_banner = pyfiglet.figlet_format("PORT SCANNER")
-# print(ascii_banner)
-#
-# # Defining a target
-# if len(sys.argv) == 2:
-    #
-    # # translate hostname to IPv4
-    # target = socket.gethostbyname(sys.argv[1])
-# else:
-    # print("Invalid ammount of Argument")
-    #
-# # Add Banner
-# print("-" * 50)
-# print("Scanning Target: " + target)
-# print("Scanning started at:" + str(datetime.now()))
-# print("-" * 50)
-#
-# try:
-    #
-    # # will scan ports between 1 to 65,535
-    # for port in range(1,65535):
-        # s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # socket.setdefaulttimeout(1)
-        #
-        # # returns an error indicator
-        # result = s.connect_ex((target,port))
-        # if result ==0:
-            # print("Port {} is open".format(port))
-        # s.close()
-        #
-# except KeyboardInterrupt:
-        # print("\n Exitting Program !!!!")
-        # sys.exit()
-# except socket.gaierror:
-        # print("\n Hostname Could Not Be Resolved !!!!")
-        # sys.exit()
-# except socket.error:
-        # print("\ Server not responding !!!!")
-        # sys.exit()
+Ports = [80,443,22,21,25,23]
+for worker in range(1,int(portrange)):
+    q.put(worker)
+    
+q.join()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -43,20 +43,3 @@ for worker in range(1,int(portrange)):
     q.put(worker)
     
 q.join()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
